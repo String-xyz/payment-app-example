@@ -1,6 +1,6 @@
 import * as stringPaySdk from "@stringpay/sdk";
 
-const userAddress = "0xC9eBA01b7249EB0d7F019946e5358a28E31edE33";
+const userAddress = "0xa4b9a1cc3cc2d7944bdce4523d9878b8dbb5f295";
 
 const payload = {
   assetName: "String Test NFT [AVAX]",
@@ -18,15 +18,15 @@ const payload = {
   txValue: `0.08 eth`,
 };
 
-const stringpay = stringPaySdk.init({
+const stringPay = stringPaySdk.init({
   env: "LOCAL",
-  apiKeyPublic: "str.fb586cb1616f45bdad9ed8d28112e433",
+  apiKeyPublic: "str.144dc50d57a84b09b95c51738b01377c",
   bypassDeviceCheck: true,
 });
 
 export async function setupIframe(app: HTMLDivElement) {
   // 1. Load iframe
-  await stringpay.loadIframe(payload);
+  await stringPay.loadIframe(payload);
 
   // 2. set up buttons
   setupButtons();
@@ -39,16 +39,23 @@ function setupButtons() {
 
 async function submitCard() {
   try {
-    const user = await stringpay.authorizeUser();
+    const user = await stringPay.authorizeUser();
 
     console.log("User authorized", user);
 
     if (user.status != "email_verified") {
       console.log("-- Requesting email verification --");
-
-      await stringpay.verifyEmail(
+      if (user.email == "") {
+        // get email from user input
+        await stringPay.verifyEmail(
+          user.id,
+          "test@string.xyz"
+        );
+      } else {
+      }
+      await stringPay.verifyEmail(
         user.id,
-        "wilfredo.string.xyz@mailinator.com"
+        "test2@string.xyz"
       );
 
       console.log("-- Email verified --");
@@ -56,26 +63,33 @@ async function submitCard() {
 
     const cb = (quote: any) => console.log("New Quote", quote);
 
-    stringpay.subscribeToQuote(payload, cb);
-    setTimeout(() => stringpay.unsubscribeFromQuote(cb), 10000);
+    stringPay.subscribeToQuote(payload, cb);
+    setTimeout(() => stringPay.unsubscribeFromQuote(cb), 10000);
 
-    // TODO: stringpay.subscribeTo(stringpay.events.CARD_TOKENIZED, (token: string) => {
-    stringpay.subscribeTo("card_tokenized", (token: string) => {
+    // TODO: stringPay.subscribeTo(stringPay.events.CARD_TOKENIZED, (token: string) => {
+    stringPay.subscribeTo("card_tokenized", (token: string) => {
       console.log("Card tokenized", token);
       displayToken(token);
     });
 
-    stringpay.subscribeTo("card_validation_changed", (data: any) => {
+    stringPay.subscribeTo("card_validation_changed", (data: any) => {
+      if (data) {
+        // set card submit button to active
+        console.log("true: ",data)
+      } else {
+        // set card submit button to inactive
+        console.log("false: ",data)
+      }
       console.log(">>>>>>> Card validation changed", data);
     });
-
-    const token = await stringpay.submitCard();
+    // on card submit button click
+    const token = await stringPay.submitCard();
     console.log("Card awaited", token);
 
-    const quote = await stringpay.getQuote(payload);
+    const quote = await stringPay.getQuote(payload);
 
     console.log("---- Submitting transaction ----");
-    const tx = await stringpay.submitTransaction({
+    const tx = await stringPay.submitTransaction({
       quote,
       paymentInfo: {
         cardToken: token,
