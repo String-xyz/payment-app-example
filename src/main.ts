@@ -8,9 +8,6 @@ app.innerHTML = `
     <h2 id="token"></h2>
     <button id="submit_card">Submit Card</button>
     <div class="string-payment-frame" />
-
-
-</div>
   </div>
 `;
 setupIframe(app);

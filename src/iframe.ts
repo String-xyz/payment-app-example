@@ -1,6 +1,7 @@
 import * as stringPaySdk from "@stringpay/sdk";
 
-const userAddress = "0xa4b9a1cc3cc2d7944bdce4523d9878b8dbb5f295";
+const userAddress = import.meta.env.VITE_USER_ADDRESS;
+const STRING_API_KEY = import.meta.env.VITE_STRING_API_KEY;
 
 const payload = {
   assetName: "String Test NFT [AVAX]",
@@ -20,14 +21,61 @@ const payload = {
 
 const stringPay = stringPaySdk.init({
   env: "LOCAL",
-  apiKeyPublic: "str.144dc50d57a84b09b95c51738b01377c",
+  apiKey: STRING_API_KEY,
   bypassDeviceCheck: true,
 });
 
+const style = {
+  PCIInnerElements: {
+    base: {
+      color: "#0C1116",
+      fontSize: "16px",
+    },
+    placeholder: {
+      base: {
+        color: "#8A98A9",
+      }
+    }
+  },
+  container: "h-full w-full mt-10 px-8 pb-6",
+
+  spacer: "space-y-4",
+
+  CVVExpiryContainer: "flex flex-row gap-x-5",
+
+  inputContainer: "basis-1/2",
+
+  inputLabel: "block text-sm font-medium mb-1 text-white",
+
+  PCIInputWrapper: `text-sm text-white 
+          bg-transparent border rounded leading-5 py-2 px-3 
+          focus:outline-none focus:border-gray-300
+          hover:border-gray-300
+          border-gray-200 h-10 shadow-sm`,
+
+  nonePCIInputWrapper: `text-sm text-white 
+          bg-transparent border rounded leading-5 py-2 px-3 
+          focus:outline-none focus:border-gray-300 
+          border-gray-200 hover:border-gray-300
+          h-10 shadow-sm placeholder-white w-full`,
+
+  error: `text-red-500 outline outline-1 
+    min-h-8 h-auto outline-rose-500 rounded m-1 
+    bg-rose-200 p-2 text-xs w-auto md:w-6/12 
+    lg:w-3/12`,
+}
+
 export async function setupIframe(app: HTMLDivElement) {
+  // 2. Set style
+  stringPay.subscribeTo("iframe_loaded", () => {
+    console.log("hello subscribed")
+    stringPay.setStyle(style);
+  });
+
   // 1. Load iframe
   await stringPay.loadIframe(payload);
 
+  // await stringPay.setStyle(style);
   // 2. set up buttons
   setupButtons();
 }
@@ -80,7 +128,7 @@ async function submitCard() {
         // set card submit button to inactive
         console.log("false: ",data)
       }
-      console.log(">>>>>>> Card validation changed", data);
+      // console.log(">>>>>>> Card validation changed", data);
     });
     // on card submit button click
     const token = await stringPay.submitCard();
