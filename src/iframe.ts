@@ -19,12 +19,6 @@ const payload = {
   txValue: `0.08 eth`,
 };
 
-const stringPay = stringPaySdk.init({
-  env: "LOCAL",
-  apiKey: STRING_API_KEY,
-  bypassDeviceCheck: true,
-});
-
 const style = {
   PCIInnerElements: {
     base: {
@@ -33,7 +27,7 @@ const style = {
     },
     placeholder: {
       base: {
-        color: "#8A98A9",
+        color: "#FFFFFF",
       }
     }
   },
@@ -65,13 +59,15 @@ const style = {
     lg:w-3/12`,
 }
 
-export async function setupIframe(app: HTMLDivElement) {
-  // 2. Set style
-  stringPay.subscribeTo("iframe_loaded", () => {
-    console.log("hello subscribed")
-    stringPay.setStyle(style);
-  });
+const stringPay = stringPaySdk.init({
+  env: "LOCAL",
+  apiKey: STRING_API_KEY,
+  setStyle: style,
+  bypassDeviceCheck: true,
+});
 
+
+export async function setupIframe(app: HTMLDivElement) {
   // 1. Load iframe
   await stringPay.loadIframe(payload);
 
